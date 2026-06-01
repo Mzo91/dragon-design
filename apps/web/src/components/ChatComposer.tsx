@@ -48,7 +48,6 @@ import {
 } from '../utils/inlineMentions';
 import { isImeComposing } from '../utils/imeComposing';
 import { ANNOTATION_EVENT, type AnnotationEventDetail } from "./PreviewDrawOverlay";
-import { DesignSystemSwitchPicker } from "./DesignSystemSwitchPicker";
 import { SearchableModelSelect } from './modelOptions';
 
 type TranslateFn = (key: keyof Dict, vars?: Record<string, string | number>) => string;
