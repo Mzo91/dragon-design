@@ -2718,6 +2718,24 @@ function reorderPreviewCommentIds(
   return ids;
 }
 
+export function appendSavedPreviewCommentOrder(
+  currentOrderIds: string[],
+  visibleComments: Array<Pick<PreviewComment, 'id'>>,
+  savedId: string,
+): string[] {
+  if (!savedId) return currentOrderIds;
+  const visibleIds = visibleComments.map((comment) => comment.id);
+  if (currentOrderIds.includes(savedId) || visibleIds.includes(savedId)) {
+    return currentOrderIds;
+  }
+  const visibleIdSet = new Set(visibleIds);
+  const kept = currentOrderIds.filter((id) => visibleIdSet.has(id));
+  const missingVisibleIds = visibleIds.filter((id) => !kept.includes(id));
+  const base = currentOrderIds.length > 0 ? [...kept, ...missingVisibleIds] : visibleIds;
+  const next = [...base, savedId];
+  return next.join('\0') === currentOrderIds.join('\0') ? currentOrderIds : next;
+}
+
 function CommentSideDock({
   comments,
   projectId,
@@ -7023,6 +7041,7 @@ function HtmlViewer({
         boardImages,
       );
       if (saved) {
+        rememberSavedPreviewCommentOrder(saved.id);
         clearBoardComposer();
         setActiveCommentExistingAttachments(saved.attachments ?? []);
         setBoardMode(true);
@@ -7058,6 +7077,7 @@ function HtmlViewer({
     try {
       const saved = await onSavePreviewComment(target, cleanNote, false);
       if (saved) {
+        rememberSavedPreviewCommentOrder(saved.id);
         setCommentSavedToast(t('chat.comments.savedToast'));
         if (activeCommentTarget) clearBoardComposer();
       }
@@ -7314,6 +7334,11 @@ function HtmlViewer({
     const missing = creationSortedSideComments.filter((comment) => !orderedIds.has(comment.id));
     return [...ordered, ...missing];
   }, [creationSortedSideComments, commentOrderIds]);
+  function rememberSavedPreviewCommentOrder(savedId: string) {
+    setCommentOrderIds((current) =>
+      appendSavedPreviewCommentOrder(current, visibleSideComments, savedId),
+    );
+  }
   const activeSideCommentId = activePreviewCommentId;
   const activeCommentTargetVisible = commentTargetIntersectsPreview(
     activeCommentTarget,
