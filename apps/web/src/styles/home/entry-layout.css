@@ -81,6 +81,11 @@
      zero-width collapsed track. */
   border-right: 0;
 }
+.entry:not(.entry--rail-open) .entry-nav-rail__brand {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
 .entry--rail-open .entry-nav-rail {
   overflow: visible;
 }
@@ -104,8 +109,9 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--bg-panel);
+  background-clip: padding-box;
   color: var(--text);
   cursor: pointer;
   opacity: 0;
@@ -113,7 +119,8 @@
   transition:
     opacity 140ms cubic-bezier(0.23, 1, 0.32, 1),
     background 140ms cubic-bezier(0.23, 1, 0.32, 1),
-    color 140ms cubic-bezier(0.23, 1, 0.32, 1);
+    color 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .entry--rail-open .entry-nav-rail__brand:hover .entry-nav-rail__collapse,
 .entry--rail-open .entry-nav-rail__collapse:focus-visible {
@@ -142,8 +149,8 @@
   color: var(--text-strong, #111);
 }
 .entry-nav-rail__collapse:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--selected-soft);
 }
 
 /* Topbar panel toggle — the single affordance left visible when the rail
@@ -157,14 +164,16 @@
   height: 30px;
   margin-right: auto;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--bg-panel);
+  background-clip: padding-box;
   color: var(--text);
   cursor: pointer;
   transition:
     opacity 160ms cubic-bezier(0.23, 1, 0.32, 1),
     background 140ms cubic-bezier(0.23, 1, 0.32, 1),
-    color 140ms cubic-bezier(0.23, 1, 0.32, 1);
+    color 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 /* The flex layout would otherwise shrink the icon's width to a sliver; pin
    the SVG so the panel glyph renders at its intended square size. */
@@ -177,8 +186,8 @@
   color: var(--text-strong, #111);
 }
 .entry-rail-toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--selected-soft);
 }
 /* Hide the topbar toggle the instant the rail docks — a fade here would
    cross with the rail's logo sliding in and read as a flash. */
@@ -203,17 +212,6 @@
   align-items: center;
   gap: 5px;
   width: 100%;
-}
-.entry-nav-rail__footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  width: 100%;
-  padding-bottom: 4px;
-}
-.entry-nav-rail__divider {
-  display: none;
 }
 .entry-nav-rail__logo-divider {
   display: none;
@@ -268,67 +266,6 @@
 [dir='rtl'] .entry-nav-rail [data-tooltip]:hover::after,
 [dir='rtl'] .entry-nav-rail [data-tooltip]:focus-visible::after {
   transform: translateY(-50%) translateX(0);
-}
-
-/* ---------- Help launcher + flyout popover ----------
-   Lives in `.entry-nav-rail__footer` and floats to the right of the
-   rail so the menu stays inside the viewport even when the rail is
-   anchored at the bottom-left of the window. */
-.entry-help-menu {
-  position: relative;
-  display: inline-flex;
-}
-.entry-help-popover {
-  position: absolute;
-  left: calc(100% + 12px);
-  bottom: 0;
-  z-index: 70;
-  min-width: 220px;
-  padding: 6px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg, 0 14px 36px rgba(0, 0, 0, 0.14));
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.entry-help-popover__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  font-size: 12.5px;
-  color: var(--text);
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out);
-}
-.entry-help-popover__item:hover {
-  background: var(--bg-subtle);
-  color: var(--text-strong);
-}
-.entry-help-popover__icon {
-  width: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-.entry-help-popover__divider {
-  height: 1px;
-  background: var(--border-soft);
-  margin: 4px 6px;
-}
-[dir='rtl'] .entry-help-popover {
-  left: auto;
-  right: calc(100% + 12px);
-}
-[dir='rtl'] .entry-help-popover__item {
-  flex-direction: row-reverse;
-  text-align: right;
 }
 
 .entry-updater-menu {
@@ -624,19 +561,25 @@
   display: block;
   pointer-events: none;
 }
+.entry-nav-rail__logo-img--sidebar {
+  width: 24px;
+  height: 24px;
+  background-image: url(/dragon-design-sidebar-logo.png);
+}
 .entry-nav-rail__btn {
   appearance: none;
   width: 38px;
   height: 38px;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: transparent;
+  background-clip: padding-box;
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out), border-color 120ms var(--ease-out);
+  transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out), border-color 120ms var(--ease-out), box-shadow 120ms var(--ease-out);
 }
 .entry-nav-rail__btn > svg {
   width: 18px;
@@ -667,8 +610,8 @@
   border-color: color-mix(in srgb, var(--accent) 12%, var(--bg-panel));
 }
 .entry-nav-rail__btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--selected-soft);
 }
 
 /* Avatar / settings dropdown — language picker section.

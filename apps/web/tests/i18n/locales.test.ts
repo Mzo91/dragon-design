@@ -278,4 +278,52 @@ describe('i18n locales', () => {
       }
     }
   });
+
+  it('uses Dragon Design copy for entry branding and removes community marketing language', async () => {
+    const dragonKeys: Array<keyof Dict> = [
+      'app.brand',
+      'settings.welcomeTitle',
+      'settings.onboardingCloudTitle',
+      'settings.onboardingCloudSignIn',
+      'settings.amrCloud',
+    ];
+    const internalEntryKeys: Array<keyof Dict> = [
+      'settings.onboardingSourceCommunity',
+      'entry.discordLabel',
+      'entry.discordAria',
+      'entry.discordAriaWithOnline',
+      'entry.followXLabel',
+      'entry.followThreadsLabel',
+      'entry.youtubeLabel',
+      'entry.followInstagramLabel',
+      'entry.followLinkedinLabel',
+      'entry.followXiaohongshuLabel',
+      'entry.helpGetHelp',
+      'entry.githubStarLabel',
+      'entry.githubStarTitle',
+      'entry.githubStarAria',
+      'designFiles.usefulInfoTip6',
+      'designFiles.usefulInfoTip7',
+      'designFiles.usefulInfoTip8',
+      'designFiles.usefulInfoTip16',
+      'designFiles.usefulInfoTip17',
+      'designFiles.usefulInfoTip18',
+      'designFiles.usefulInfoTip19',
+      'designFiles.usefulInfoTip20',
+    ];
+    const marketingPattern = /Open Design|Discord|Star|Follow|Join|OpenDesignHQ|opendesign\.ai|Open-Design-ai|open-design-ai/i;
+
+    for (const locale of LOCALES) {
+      const dict = await loadDict(locale);
+
+      for (const key of dragonKeys) {
+        expect(dict[key], `${locale}.${String(key)}`).toContain('Dragon Design');
+        expect(dict[key], `${locale}.${String(key)}`).not.toMatch(/Open Design/i);
+      }
+
+      for (const key of internalEntryKeys) {
+        expect(dict[key], `${locale}.${String(key)}`).not.toMatch(marketingPattern);
+      }
+    }
+  });
 });

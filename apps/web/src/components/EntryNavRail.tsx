@@ -3,13 +3,11 @@
 // Renders a narrow icon-only column. The first slot is the brand logo,
 // followed by the primary destinations users expect to keep in reach:
 // New project, home, projects, brand kit, automations, plugins,
-// and integrations. Footer controls are reserved for lower-frequency
-// support affordances such as the help launcher.
+// and integrations.
 // Language switching and other account-scoped controls live behind the
 // floating settings cog in the top-right corner of the main content.
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { EntryHelpMenu } from './EntryHelpMenu';
 import { Icon } from './Icon';
 import { useT } from '../i18n';
 import { LIBRARY_UI_VISIBLE } from '../features/libraryUi';
@@ -116,7 +114,7 @@ export function EntryNavRail({
             data-testid="entry-nav-logo"
           >
             <span
-              className="entry-nav-rail__logo-img od-brand-glyph"
+              className="entry-nav-rail__logo-img entry-nav-rail__logo-img--sidebar od-brand-glyph"
               aria-hidden="true"
             />
           </button>
@@ -206,10 +204,6 @@ export function EntryNavRail({
         >
           <Icon name="link" size={18} />
         </NavButton>
-      </div>
-      <div className="entry-nav-rail__footer">
-        <div className="entry-nav-rail__divider" role="separator" />
-        <EntryHelpMenu />
       </div>
     </nav>
   );

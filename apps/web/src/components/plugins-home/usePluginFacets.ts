@@ -36,6 +36,7 @@ interface UsePluginFacetsArgs {
   savedPluginIds?: ReadonlySet<string>;
   preferDefaultFacet?: boolean;
   locale?: string;
+  allowedCategorySlugs?: readonly string[];
 }
 
 export interface UsePluginFacetsResult {
@@ -67,6 +68,7 @@ export function usePluginFacets({
   savedPluginIds,
   preferDefaultFacet = true,
   locale,
+  allowedCategorySlugs,
 }: UsePluginFacetsArgs): UsePluginFacetsResult {
   const [mode, setMode] = useState<FilterMode>('all');
   const [selection, setSelection] = useState<FacetSelection>(EMPTY_SELECTION);
@@ -112,7 +114,23 @@ export function usePluginFacets({
     [savedPluginIds, orderedPlugins],
   );
 
-  const catalog = useMemo(() => buildFacetCatalog(visiblePlugins), [visiblePlugins]);
+  const catalog = useMemo(() => {
+    const nextCatalog = buildFacetCatalog(visiblePlugins);
+    if (!allowedCategorySlugs || allowedCategorySlugs.length === 0) return nextCatalog;
+    const allowed = new Set(allowedCategorySlugs);
+    return {
+      category: nextCatalog.category.filter((option) => allowed.has(option.slug)),
+      subcategory: Object.fromEntries(
+        Object.entries(nextCatalog.subcategory).filter(([slug]) => allowed.has(slug)),
+      ),
+    };
+  }, [allowedCategorySlugs, visiblePlugins]);
+
+  useEffect(() => {
+    if (!selection.category) return;
+    if (catalog.category.some((option) => option.slug === selection.category)) return;
+    setSelection(resolveDefaultSelection(catalog));
+  }, [catalog, selection.category]);
 
   useEffect(() => {
     if (bootstrapped) return;

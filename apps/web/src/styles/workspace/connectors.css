@@ -370,20 +370,7 @@
 .entry-side-foot-row .foot-pill {
   min-width: 0;
 }
-.entry-side-foot-row .foot-pill-follow {
-  flex: 0 1 auto;
-}
-/* Social cluster (Discord + X) — sits at the right end of the bottom row
-   via `margin-left: auto`, which opens flex space between the left
-   "your stuff" group (Language, Pet) and the right "follow us" group. */
-.entry-side-foot-social {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-.entry-side-foot-row .foot-pill-pet-label,
-.entry-side-foot-row .foot-pill-follow-label {
+.entry-side-foot-row .foot-pill-pet-label {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;

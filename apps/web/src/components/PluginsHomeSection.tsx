@@ -35,6 +35,7 @@ const RICH_PLUGIN_RENDER_LIMIT = 60;
 const RICH_PLUGIN_RENDER_BATCH_SIZE = 60;
 const GALLERY_PLUGIN_RENDER_LIMIT = 12;
 const GALLERY_PLUGIN_RENDER_BATCH_SIZE = 12;
+const GALLERY_CATEGORY_SLUGS = ['prototype', 'live-artifact'] as const;
 
 interface Props {
   plugins: InstalledPluginRecord[];
@@ -109,6 +110,7 @@ export function PluginsHomeSection({
     savedPluginIds,
     preferDefaultFacet,
     locale,
+    allowedCategorySlugs: cardLayout === 'gallery' ? GALLERY_CATEGORY_SLUGS : undefined,
   });
   const renderedPlugins = useMemo(
     () => filtered.slice(0, renderLimit),

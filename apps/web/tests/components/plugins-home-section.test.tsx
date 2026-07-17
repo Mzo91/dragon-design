@@ -218,13 +218,20 @@ describe('PluginsHomeSection (community gallery)', () => {
     expect(screen.getByTestId('plugins-home-use-prototype-dashboard')).toBeTruthy();
   });
 
-  it('hides All and keeps Slides selected on the lightweight gallery layout', () => {
+  it('hides All and keeps only Prototype plus Live Artifact on the lightweight gallery layout', () => {
     renderSection(sample, { cardLayout: 'gallery' });
 
     expect(screen.queryByTestId('plugins-home-pill-category-all')).toBeNull();
-    expect(screen.getByTestId('plugins-home-pill-category-deck').getAttribute('aria-selected')).toBe('true');
-    fireEvent.click(screen.getByTestId('plugins-home-pill-category-deck'));
-    expect(screen.getByTestId('plugins-home-pill-category-deck').getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('plugins-home-pill-category-prototype').getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('plugins-home-pill-category-live-artifact')).toBeTruthy();
+    expect(screen.queryByTestId('plugins-home-pill-category-deck')).toBeNull();
+    expect(screen.queryByTestId('plugins-home-pill-category-image')).toBeNull();
+    expect(screen.queryByTestId('plugins-home-pill-category-video')).toBeNull();
+    expect(screen.queryByTestId('plugins-home-pill-category-hyperframes')).toBeNull();
+    expect(screen.queryByTestId('plugins-home-pill-category-audio')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('plugins-home-pill-category-prototype'));
+    expect(screen.getByTestId('plugins-home-pill-category-prototype').getAttribute('aria-selected')).toBe('true');
   });
 });
 
