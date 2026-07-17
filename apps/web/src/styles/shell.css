@@ -1022,12 +1022,12 @@
   transition: box-shadow var(--dur-quick) var(--ease-out), transform var(--dur-quick) var(--ease-out);
 }
 .avatar-btn:hover:not(:disabled) {
-  box-shadow: 0 0 0 3px rgba(194, 83, 45, 0.18);
+  box-shadow: 0 0 0 3px var(--selected-soft);
   border-color: transparent;
 }
 .avatar-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(194, 83, 45, 0.32);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--selected) 28%, transparent);
   border-color: transparent;
 }
 .avatar-btn:active:not(:disabled) { transform: scale(0.96); }
@@ -1365,11 +1365,11 @@ a.avatar-item:visited {
 .env-pill:hover { background: var(--bg-panel); border-color: var(--border-strong); }
 .env-pill-dot {
   width: 22px; height: 22px; border-radius: 50%;
-  background: linear-gradient(135deg, #d97757 0%, #b85a3b 100%);
+  background: var(--accent);
   flex-shrink: 0;
 }
 .env-pill-dot[data-mode="api"] {
-  background: linear-gradient(135deg, #1c1b1a 0%, #4b4948 100%);
+  background: var(--text-strong);
 }
 .env-pill-label { font-weight: 500; font-size: 12px; }
 .env-pill-meta {

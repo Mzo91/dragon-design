@@ -11,18 +11,18 @@ function cssBlock(selector: string): string {
 }
 
 describe('default app background colors', () => {
-  it('uses the release light background color by default', () => {
+  it('uses the stage 4A light background color by default', () => {
     const root = cssBlock(':root');
 
-    expect(root).toContain('--bg: #faf9f7;');
-    expect(root).toContain('--bg-app: #faf9f7;');
+    expect(root).toContain('--bg: #f6f8fb;');
+    expect(root).toContain('--bg-app: #f3f6fb;');
   });
 
-  it('keeps the dark theme background unchanged', () => {
+  it('uses the stage 4A dark background color', () => {
     const dark = cssBlock('[data-theme="dark"]');
 
-    expect(dark).toContain('--bg: #1a1917;');
-    expect(dark).toContain('--bg-app: #1a1917;');
+    expect(dark).toContain('--bg: #111827;');
+    expect(dark).toContain('--bg-app: #0f172a;');
   });
 
   it('prefers platform UI fonts over optional local app fonts', () => {

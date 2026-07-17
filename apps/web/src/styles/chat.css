@@ -495,7 +495,7 @@
   flex: 0 0 auto;
 }
 .msg-plugin-chip--design-system .msg-plugin-chip__dot {
-  background: #d76445;
+  background: var(--selected);
 }
 .msg-plugin-chip__icon {
   display: inline-flex;

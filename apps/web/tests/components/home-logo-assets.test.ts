@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const read = (relative: string) =>
@@ -6,36 +6,41 @@ const read = (relative: string) =>
 
 const homeHeroSource = read('../../src/components/HomeHero.tsx');
 const entryNavRailSource = read('../../src/components/EntryNavRail.tsx');
-const logoSvg = read('../../public/logo.svg');
-const brandIconSvg = read('../../public/brand-icon.svg');
-
-// The current Open Design brand glyph is the ink superellipse tile introduced
-// with the landing-page rebrand (landing PR #3444): its outline starts with
-// this path command in every export of the mark.
-const CURRENT_GLYPH_PATH_PREFIX = 'M41 0.726562';
-// The retired glyph was a 444x444 dark tile (#202020) whose cursor arrow was
-// drawn as a separate path starting at this command.
-const RETIRED_GLYPH_MARKERS = ['#202020', 'M212.059', 'width="444"'];
+const appLayoutSource = read('../../app/layout.tsx');
+const primitivesCss = read('../../src/styles/primitives.css');
+const enLocale = read('../../src/i18n/locales/en.ts');
+const zhCnLocale = read('../../src/i18n/locales/zh-CN.ts');
+const dragonLogoUrl = new URL('../../public/dragon-design-logo.png', import.meta.url);
 
 describe('Home logo assets', () => {
-  it('ships the current brand glyph in the public logo assets', () => {
-    expect(logoSvg).toContain(CURRENT_GLYPH_PATH_PREFIX);
-    expect(brandIconSvg).toContain(CURRENT_GLYPH_PATH_PREFIX);
-    for (const marker of RETIRED_GLYPH_MARKERS) {
-      expect(logoSvg).not.toContain(marker);
-      expect(brandIconSvg).not.toContain(marker);
-    }
+  it('ships the Dragon Design logo as a public web asset', () => {
+    expect(existsSync(dragonLogoUrl)).toBe(true);
+    expect(statSync(dragonLogoUrl).size).toBeGreaterThan(100_000);
   });
 
-  it('keeps brand-icon.svg maskable (theme color comes from CSS)', () => {
-    expect(brandIconSvg).toContain('currentColor');
+  it('uses the Dragon Design logo for shared brand glyphs', () => {
+    expect(primitivesCss).toContain('url(/dragon-design-logo.png)');
+    expect(primitivesCss).not.toContain('url(/brand-icon.svg)');
   });
 
-  it('renders the brand glyph on both Home entry surfaces', () => {
+  it('renders the Dragon Design brand on both Home entry surfaces', () => {
+    expect(homeHeroSource).toContain("{t('app.brand')}");
+    expect(homeHeroSource).not.toContain('home-hero__brand-name">Open Design');
     expect(homeHeroSource).toContain('od-brand-glyph');
-    expect(homeHeroSource).not.toContain('src="/app-icon.svg"');
 
     expect(entryNavRailSource).toContain('od-brand-glyph');
-    expect(entryNavRailSource).not.toContain('src="/app-icon.svg"');
+  });
+
+  it('sets the primary visible app brand to Dragon Design', () => {
+    expect(enLocale).toContain("'app.brand': 'Dragon Design'");
+    expect(zhCnLocale).toContain('"app.brand": "Dragon Design"');
+    expect(enLocale).toContain('Bundled plugins ship with Dragon Design');
+    expect(zhCnLocale).toContain('目录为空。Dragon Design 会随附内置插件');
+  });
+
+  it('uses Dragon Design for browser metadata and app icons', () => {
+    expect(appLayoutSource).toContain("title: 'Dragon Design'");
+    expect(appLayoutSource).toContain("icon: '/dragon-design-logo.png'");
+    expect(appLayoutSource).toContain("apple: '/dragon-design-logo.png'");
   });
 });
