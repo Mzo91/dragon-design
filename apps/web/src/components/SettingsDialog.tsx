@@ -315,8 +315,8 @@ export function deriveAboutUpdateControl(
           primaryAction: 'quit',
           primaryLabelKey: 'updater.quitButton',
           showReleaseLink: false,
-          statusKey: 'settings.updateQuitFailed',
-          statusTone: 'warning',
+          statusKey: model.updateKind === 'payload' ? 'updater.installingRestart' : 'updater.opening',
+          statusTone: 'neutral',
         };
       }
       const canInstallUpdate = model.canOpenInstaller || model.canApplyInPlace;
@@ -343,14 +343,22 @@ export function deriveAboutUpdateControl(
         statusKey: 'settings.updateStatusInstalling',
         statusTone: 'neutral',
       };
-    case 'error':
+    case 'error': {
+      const canRetryInstall = model.status.downloadPath != null
+        && (model.canOpenInstaller || model.canApplyInPlace);
+      const primaryAction: AboutUpdatePrimaryAction = canRetryInstall
+        ? 'install'
+        : model.availableVersion != null && model.canDownload
+          ? 'download'
+          : 'check';
       return {
-        primaryAction: 'check',
+        primaryAction,
         primaryLabelKey: 'settings.updateRetry',
         showReleaseLink: true,
-        statusKey: 'settings.updateStatusFailed',
+        statusKey: 'updater.failed',
         statusTone: 'error',
       };
+    }
     case 'unsupported':
       return {
         primaryAction: null,
@@ -1690,17 +1698,22 @@ export function SettingsDialog({
   >(() => new Set());
   const [aboutUpdaterModel, setAboutUpdaterModel] = useState<UpdaterModel>(() => deriveUpdaterModel(null));
   const [aboutUpdateActionBusy, setAboutUpdateActionBusy] = useState(false);
+  const [aboutUpdateQuitFailed, setAboutUpdateQuitFailed] = useState(false);
   const [aboutToast, setAboutToast] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
     const unsubscribe = subscribeToUpdaterStatus((status) => {
       if (!mounted) return;
-      setAboutUpdaterModel(deriveUpdaterModel(status, { hostAvailable: true }));
+      const nextModel = deriveUpdaterModel(status, { hostAvailable: true });
+      setAboutUpdaterModel(nextModel);
+      if (!nextModel.installerOpened) setAboutUpdateQuitFailed(false);
     });
     void readUpdaterStatus({ payload: { source: 'settings-about:mount' } }).then((result) => {
       if (!mounted) return;
-      setAboutUpdaterModel(result.ok ? result.model : deriveUpdaterModel(null, { hostAvailable: false }));
+      const nextModel = result.ok ? result.model : deriveUpdaterModel(null, { hostAvailable: false });
+      setAboutUpdaterModel(nextModel);
+      if (!nextModel.installerOpened) setAboutUpdateQuitFailed(false);
     });
     return () => {
       mounted = false;
@@ -1708,10 +1721,18 @@ export function SettingsDialog({
     };
   }, []);
 
-  const aboutUpdateControl = useMemo(
-    () => deriveAboutUpdateControl(aboutUpdaterModel, appVersionInfo),
-    [aboutUpdaterModel, appVersionInfo],
-  );
+  const aboutUpdateControl = useMemo(() => {
+    const control = deriveAboutUpdateControl(aboutUpdaterModel, appVersionInfo);
+    if (!aboutUpdateQuitFailed || !aboutUpdaterModel.installerOpened) return control;
+    return {
+      ...control,
+      primaryAction: 'quit' as const,
+      primaryLabelKey: 'updater.quitButton' as const,
+      showReleaseLink: false,
+      statusKey: 'updater.quitFailedTitle' as const,
+      statusTone: 'warning' as const,
+    };
+  }, [aboutUpdateQuitFailed, aboutUpdaterModel, appVersionInfo]);
 
   const applyAboutUpdaterResult = useCallback((result: UpdaterActionResult): boolean => {
     if (!result.ok) {
@@ -1729,6 +1750,8 @@ export function SettingsDialog({
   const handleAboutUpdateAction = useCallback(async () => {
     if (aboutUpdateActionBusy || aboutUpdaterModel.busy || aboutUpdateControl.primaryAction == null) return;
     setAboutUpdateActionBusy(true);
+    setAboutUpdateQuitFailed(false);
+    let quitAttempted = false;
     try {
       const options = { payload: { source: 'settings-about' } };
       if (aboutUpdateControl.primaryAction === 'check') {
@@ -1736,16 +1759,25 @@ export function SettingsDialog({
       } else if (aboutUpdateControl.primaryAction === 'download') {
         applyAboutUpdaterResult(await downloadUpdaterUpdate(options));
       } else if (aboutUpdateControl.primaryAction === 'quit') {
+        quitAttempted = true;
         const quitResult = await quitAfterUpdaterInstallerOpen(options);
-        if (!quitResult.ok) setAboutToast(t('settings.updateQuitFailed'));
+        if (!quitResult.ok) {
+          setAboutUpdateQuitFailed(true);
+          setAboutToast(t('updater.quitFailedTitle'));
+        }
       } else {
         const installed = applyAboutUpdaterResult(await openUpdaterInstaller(options));
         if (installed) {
+          quitAttempted = true;
           const quitResult = await quitAfterUpdaterInstallerOpen(options);
-          if (!quitResult.ok) setAboutToast(t('settings.updateQuitFailed'));
+          if (!quitResult.ok) {
+            setAboutUpdateQuitFailed(true);
+            setAboutToast(t('updater.quitFailedTitle'));
+          }
         }
       }
     } catch {
+      if (quitAttempted) setAboutUpdateQuitFailed(true);
       setAboutToast(t('settings.updateActionFailed'));
     } finally {
       setAboutUpdateActionBusy(false);

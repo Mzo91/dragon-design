@@ -5002,7 +5002,7 @@ describe('SettingsDialog about interactions', () => {
     });
   });
 
-  it('keeps a quit retry action when update install succeeds but quit fails', async () => {
+  it('keeps a quit retry action when update install succeeds but quit throws or fails', async () => {
     const payloadReady = updateStatus({
       artifact: {
         name: 'open-design-1.2.3-beta.4-mac-arm64-payload.zip',
@@ -5029,10 +5029,12 @@ describe('SettingsDialog about interactions', () => {
       },
     });
     const install = vi.fn(async () => installed);
-    const quit = vi.fn(async () => ({
-      ok: false as const,
-      reason: 'desktop quit is not available',
-    }));
+    const quit = vi.fn()
+      .mockRejectedValueOnce(new Error('desktop quit failed'))
+      .mockResolvedValue({
+        ok: false as const,
+        reason: 'desktop quit is not available',
+      });
     restoreOpenDesignHost = installMockOpenDesignHost({
       host: {
         updater: {
@@ -5066,7 +5068,7 @@ describe('SettingsDialog about interactions', () => {
       expect(quit).toHaveBeenCalledTimes(1);
     });
     expect(screen.getByRole('button', { name: en['updater.quitButton'] })).toBeTruthy();
-    expect(screen.getAllByText(en['settings.updateQuitFailed']).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(en['updater.quitFailedTitle']).length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole('button', { name: en['updater.quitButton'] }));
 
